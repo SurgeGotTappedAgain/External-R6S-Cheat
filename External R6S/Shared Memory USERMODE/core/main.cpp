@@ -10,6 +10,8 @@ HWND hwnd = nullptr;
 
 // Credits: https://github.com/fir3z (Base + Overlay), InsideExploit (For The Help & Decryption), UghYes (For Operator Name List) 
 
+// 
+
 auto UpdateEnts()
 {
 	while (true)
@@ -17,6 +19,7 @@ auto UpdateEnts()
 		std::vector<entity_t> tmp = { {} };
 		for (int i = 0; i < globals.entityCount; i++)
 		{
+			// Checks could crash cheat when player is not a valid entity, so remove as you wish
 			uint64_t player = driver::Read<uint64_t>(globals.entityList + (i * 0x8));
 			if (!player) continue;
 

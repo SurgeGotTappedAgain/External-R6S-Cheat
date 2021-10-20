@@ -10,22 +10,19 @@ HWND hwnd = nullptr;
 
 // Credits: https://github.com/fir3z (Base + Overlay), InsideExploit (For The Help & Decryption), UghYes (For Operator Name List) 
 
-// 
-
 auto UpdateEnts()
 {
 	while (true)
 	{
 		std::vector<entity_t> tmp = { {} };
-		for (int i = 0; i < globals.entityCount; i++)
+		for (int i = 0; i < 10 i++)
 		{
-			// Checks could crash cheat when player is not a valid entity, so remove as you wish
-			uint64_t player = driver::Read<uint64_t>(globals.entityList + (i * 0x8));
+			uint64_t player = driver::Read<uint64_t>(globals.entityList + (i * sizeof(uint64_t)));
 			if (!player) continue;
 
 			uint64_t pawn = Game::Pawn(player);
 			if (!pawn) continue;
-			
+
 			if (globals.teamcheck)
 			{
 				globals.TeamID = Game::get_team_id(globals.replicationinfo);
@@ -59,6 +56,7 @@ int main()
 	driver::getProcessID("RainbowSix.exe");
 	Base = (uintptr_t)driver::getModuleBase("RainbowSix.exe");
 
+	// Updated
 	globals.gameManager = Game::GameManager();
 	globals.gameProfile = Game::GamerProfile();
 	globals.cam = Game::GetCamera();

@@ -4,25 +4,21 @@
 #include <xmmintrin.h>
 #include <d3d9.h>
 #include "globals.hpp"
+#include <emmintrin.h>
 
 namespace Game
 {
 	uint64_t GamerProfile()
 	{
-		//E8 ? ? ? ? 80 BE ? ? ? ? ? 0F 84 ? ? ? ? 4D 39 FC
-		return (((driver::Read<uint64_t>)((((driver::Read<uint64_t>)(((driver::Read<uint64_t>(Base + 0x626FDF8) - 65) ^ 0xCDECFA1D53E14678ui64) + 0x1B) - 55i64) ^ 0x257AA015A9CCDE03i64) - 0x2CCBCDD60B845E55i64) + 40i64) - 47i64) ^ 0x14;
+		return (driver::Read<uint64_t>(__ROL8__(Base + 0x653DF88 + 0x62C3AB5D73DB1EE6i64, 40) + 0x2ABB4A126D979937i64) - 43i64) ^ 0x149437F025AE55E3i64;
 	}
 	uint64_t GameManager()
 	{
-		// E8 ? ? ? ? 48 83 C7 ? 48 39 FE 74 ? 48 8B 1F
-		//E8 ? ? ? ? 4C 89 64 24 ? 48 C7 44 24 ? ? ? ? ? 4C 89 64 24 ?
-		return ((driver::Read<uint64_t>(Base + 0x62436D0) ^ 0x223768D2418BDAD5i64) - 10) ^ 0xB7EA2884DF893376ui64;
+		return (__ROL8__(driver::Read<uint64_t>(Base + 0x6511860), 0x22) ^ 0x7A5E5EE36682CFD2i64) - 0x5F;
 	}
 	uintptr_t GetCamera()
 	{
-		//E8 ? ? ? ? 83 7C 24 ? ? 44 8B 6C 24 ?
-		//E8 ? ? ? ? B9 ? ? ? ? 23 8E ? ? ? ? 8B 86 ? ? ? ?
-		uintptr_t cameraManager = driver::Read<uintptr_t>(Base + 0x6134C80);
+		uintptr_t cameraManager = driver::Read<uintptr_t>(Base + 0x63FF2C0);
 		cameraManager = driver::Read<uintptr_t>(cameraManager + 0x40);
 		cameraManager = driver::Read<uintptr_t>(cameraManager + 0x0);
 		return cameraManager;
@@ -32,18 +28,18 @@ namespace Game
 		const auto decryption = [&game_manager](const uint32_t offset = 0) -> uint64_t
 		{
 			const auto temp = driver::Read <uint64_t>(game_manager + offset + 0x50);
-			return (temp ^ 0x172C2910827EB42E) + 0x2954C82F81C817B9;
+			return (temp ^ 0xF7FF10FCCEE0BED8);
 		};
 
 		return { decryption(), static_cast<uint32_t>(decryption(8) & 0x3FFFFFFF) };
 	}
 	static uint64_t Skeleton(const uint64_t pawn)
 	{
-		return __ROL8__((driver::Read<uintptr_t>(pawn + 0xA60) ^ 0x7Di64) + 0x552793BE79114B13i64, 4);
+		return (__ROL8__(driver::Read<uint64_t>(pawn + 0xA90), 52) ^ 0x5Di64) - 102;
 	}
 	uint64_t Pawn(uint64_t address)
 	{
-		return __ROL8__(driver::Read<uint64_t>(address + 0x38) - 86, 19) - 0x1BF4CD74E0E65D4;
+		return __ROL8__(__ROL8__(driver::Read<uint64_t>(address + 0x38), 36) ^ 0xE3D46D76600D4EB9, 11);
 	}
 	uint64_t component(uint64_t pawn)
 	{
@@ -112,33 +108,31 @@ namespace Game
 	vec3 DecryptCamera(__m128i address) // updated
 	{
 		__m128i vector = _mm_load_si128(&address);
-		vector.m128i_i64[0] -= 4;
-		vector.m128i_i64[1] -= 4;
-		vector.m128i_i64[0] = (__ROL8__(vector.m128i_i64[0], 0x9) ^ 0x117CF778AE210F90);
-		vector.m128i_i64[1] = (__ROL8__(vector.m128i_i64[1], 0x9) ^ 0x117CF778AE210F90);
+		vector.m128i_u64[0] = ((vector.m128i_u64[0] - 0x64) ^ 0x7399e7a77eda71a7) - 0x77;
+		vector.m128i_u64[1] = ((vector.m128i_u64[1] - 0x64) ^ 0x7399e7a77eda71a7) - 0x77;
 		return *reinterpret_cast<vec3*>(&vector);
 	}
 	static bool WorldToScreen(vec3 world, vec2& output)
 	{
-		vec3 temp = world - DecryptCamera(driver::Read<__m128i>(globals.cam + 0x1B0)); // translation
+		vec3 temp = world - DecryptCamera(driver::Read<__m128i>(globals.cam + 0x1C0)); // translation
 		float x, y, z = { };
-		x = temp.dot(DecryptCamera(driver::Read<__m128i>(globals.cam + 0x180))); //right
-		y = temp.dot(DecryptCamera(driver::Read<__m128i>(globals.cam + 0x190))); // up
-		z = temp.dot(DecryptCamera(driver::Read<__m128i>(globals.cam + 0x1A0)) * -1.f); // forward
+		x = temp.dot(DecryptCamera(driver::Read<__m128i>(globals.cam + 0x190))); //right
+		y = temp.dot(DecryptCamera(driver::Read<__m128i>(globals.cam + 0x1A0))); // up
+		z = temp.dot(DecryptCamera(driver::Read<__m128i>(globals.cam + 0x1B0)) * -1.f); // forward
 
 		int width = GetSystemMetrics(SM_CXSCREEN);
 		int height = GetSystemMetrics(SM_CYSCREEN);
 
-		output.x = (width / 2.f) * (1.f + x / - driver::Read<float>(globals.cam + 0x360) / z); // fovx
-		output.y = (height / 2.f) * (1.f - y / - driver::Read<float>(globals.cam + 0x364) / z); // fovy
+		output.x = (width / 2.f) * (1.f + x / -driver::Read<float>(globals.cam + 0x360) / z); // fovx
+		output.y = (height / 2.f) * (1.f - y / -driver::Read<float>(globals.cam + 0x364) / z); // fovy
 
 		if (output.x < 0.0f || output.x > width)
-		return false;
+			return false;
 		return z >= 1.0f;
 	}
 	uint64_t ReplicationInfo(uint64_t controller)
 	{
-		return _rotl64(driver::Read<uint64_t>(controller + 0x98) - 0x34, 0x2F) - 0x6F;
+		return __ROL8__(__ROL8__(driver::Read<uint64_t>(controller + 0x70), 0x1C) - 0x4Ci64, 0x27);
 	}
 	std::string name(uintptr_t entity)
 	{
@@ -147,23 +141,16 @@ namespace Game
 	}
 	static uint32_t get_team_id(const uint64_t replicationinfo)
 	{
-		uintptr_t v18 = _rotl64(driver::Read<uintptr_t>(replicationinfo + 0x88) - 96i64, 19);
-		uint32_t v15 = _rotl((driver::Read<uint32_t>(v18 + 0xA0) ^ 0xF16A0058) - 96, 30);
-		return v15;
-	}
-	uintptr_t  localplayer()
-	{
-		// maybe work? have not tested
-		uintptr_t  unencrypted = driver::Read<uintptr_t>(Base + 0x626FDF8);
-		return (((driver::Read<uintptr_t >)((((driver::Read<uintptr_t >)(((driver::Read<uintptr_t >(unencrypted - 65) ^ 0xCDECFA1D53E14678ui64) + 0x1B) - 55i64) ^ 0x257AA015A9CCDE03i64) - 0x2CCBCDD60B845E55i64) + 40i64) - 47i64) ^ 0x14) - 0x69BCCADF0EFC7339i64;
-	}
-	uint64_t RoundManager()
-	{
-		return __ROL8__(driver::Read<uint64_t>(Base + 0x712CC88) - 0x75FC718305CFEEBDi64, 2);
-	}
-	uint64_t GameState()
-	{
-		return __ROL4__((driver::Read<uint64_t>(globals.roundManager + 181) ^ 0x13) - 13, 24);
+		uint64_t rax = 0ull, rbx = 0ull, rcx = 0ull, rdx = 0ull, rdi = 0ull, rsi = 0ull, r8 = 0ull, r9 = 0ull, r10 = 0ull, r11 = 0ull, r12 = 0ull, r13 = 0ull, r14 = 0ull, r15 = 0ull, rbp = replicationinfo;
+		rax = driver::Read<uint64_t>(rbp + 0x70);
+		rax = _rotl64(rax, 0x25);
+		rax += 0x14455B1E10BCF6B1i64;
+		rax = _rotl64(rax, 0x37);
+		rax = driver::Read<uint64_t>(rax + 0x84);
+		rax -= 0x7BB86DD6;
+		rax ^= 0x63;
+		rax -= 0x43;
+		return rax;
 	}
 	const char* OperatorNames[28][6] =
 	{

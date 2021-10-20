@@ -7,7 +7,6 @@
 #include "../globals.hpp"
 #include <random>
 HWND hwnd = nullptr;
-
 // Credits: https://github.com/fir3z (Base + Overlay), InsideExploit (For The Help & Decryption), UghYes (For Operator Name List) 
 
 auto UpdateEnts()
@@ -18,10 +17,10 @@ auto UpdateEnts()
 		for (int i = 0; i < 10 i++)
 		{
 			uint64_t player = driver::Read<uint64_t>(globals.entityList + (i * sizeof(uint64_t)));
-			if (!player) continue;
+			//if (!player) continue;
 
 			uint64_t pawn = Game::Pawn(player);
-			if (!pawn) continue;
+			//if (!pawn) continue;
 
 			if (globals.teamcheck)
 			{

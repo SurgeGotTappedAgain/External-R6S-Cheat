@@ -8,6 +8,7 @@
 
 namespace Game
 {
+	// Updated Decryption To Y6S3.3 Patch
 	uint64_t GamerProfile()
 	{
 		return (driver::Read<uint64_t>(__ROL8__(Base + 0x653DF88 + 0x62C3AB5D73DB1EE6i64, 40) + 0x2ABB4A126D979937i64) - 43i64) ^ 0x149437F025AE55E3i64;

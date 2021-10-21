@@ -14,13 +14,13 @@ auto UpdateEnts()
 	while (true)
 	{
 		std::vector<entity_t> tmp = { {} };
-		for (int i = 0; i < 10 i++)
+		for (int i = 0; i < 11 i++)
 		{
 			uint64_t player = driver::Read<uint64_t>(globals.entityList + (i * sizeof(uint64_t)));
-			//if (!player) continue;
+			if (!player) continue;
 
 			uint64_t pawn = Game::Pawn(player);
-			//if (!pawn) continue;
+			if (!pawn) continue;
 
 			if (globals.teamcheck)
 			{
@@ -72,7 +72,7 @@ int main()
 
 	while (true)
 	{
-		main_loop();
+	   main_loop();
 	}
 
 	std::getchar();

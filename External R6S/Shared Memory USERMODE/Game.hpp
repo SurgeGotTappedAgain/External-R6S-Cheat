@@ -8,7 +8,7 @@
 
 namespace Game
 {
-	// Updated Decryption To Y6S3.3 Patch
+	// Updated to Thorn Update
 	uint64_t GameManager()
 	{
 		return __ROL8__(driver::Read<uint64_t>(Base + 0x75AE938) ^ 0xCD92F3B8EB06567Dui64, 35) - 0x54A8DB5A73F34821i64;

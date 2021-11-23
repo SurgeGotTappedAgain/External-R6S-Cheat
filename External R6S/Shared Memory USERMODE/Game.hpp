@@ -9,17 +9,13 @@
 namespace Game
 {
 	// Updated Decryption To Y6S3.3 Patch
-	uint64_t GamerProfile()
-	{
-		return __ROL8__(driver::Read<uint64_t>(Base + 0x653DF88) + 0x62C3AB5D73DB1EE6i64, 40) + 0x2ABB4A126D97991Fi64;
-	}
 	uint64_t GameManager()
 	{
-		return (__ROL8__(driver::Read<uint64_t>(Base + 0x6511860), 0x22) ^ 0x7A5E5EE36682CFD2i64) - 0x5F;
+		return __ROL8__(driver::Read<uint64_t>(Base + 0x75AE938) ^ 0xCD92F3B8EB06567Dui64, 35) - 0x54A8DB5A73F34821i64;
 	}
 	uintptr_t GetCamera()
 	{
-		uintptr_t cameraManager = driver::Read<uintptr_t>(Base + 0x63FF2C0);
+		uintptr_t cameraManager = driver::Read<uintptr_t>(Base + 0x64072C0);
 		cameraManager = driver::Read<uintptr_t>(cameraManager + 0x40);
 		cameraManager = driver::Read<uintptr_t>(cameraManager + 0x0);
 		return cameraManager;
@@ -28,19 +24,19 @@ namespace Game
 	{
 		const auto decryption = [&game_manager](const uint32_t offset = 0) -> uint64_t
 		{
-			const auto temp = driver::Read <uint64_t>(game_manager + offset + 0x50);
-			return (temp ^ 0xF7FF10FCCEE0BED8);
+			const auto temp = driver::Read<uint64_t>(game_manager + offset + 0x60);
+			return ((temp >> 0x28 | temp << 0x18) + 0xFFFFFFFFFFFFFFEB) ^ 0xF7F14A29FEA0106D;
 		};
 
 		return { decryption(), static_cast<uint32_t>(decryption(8) & 0x3FFFFFFF) };
 	}
 	static uint64_t Skeleton(const uint64_t pawn)
 	{
-		return (__ROL8__(driver::Read<uint64_t>(pawn + 0xA90), 52) ^ 0x5Di64) - 102;
+		return ((driver::Read<uint64_t>(pawn + 0xA10) + 403854322115628993i64) ^ 0x9943450FAC2AADE3ui64) + 0x1AB82EE9B19AA51Ci64;
 	}
 	uint64_t Pawn(uint64_t address)
 	{
-		return __ROL8__(__ROL8__(driver::Read<uint64_t>(address + 0x38), 36) ^ 0xE3D46D76600D4EB9, 11);
+		return __ROL8__((driver::Read<uint64_t>(address + 0x38) + 0x762E2C76051104B5i64) ^ 0x6C7CB030D648D2E6i64, 0x3B);
 	}
 	uint64_t component(uint64_t pawn)
 	{
@@ -108,24 +104,23 @@ namespace Game
 	}
 	vec3 DecryptCamera(__m128i address) // updated
 	{
-		__m128i vector = _mm_load_si128(&address);
-		vector.m128i_u64[0] = ((vector.m128i_u64[0] - 0x64) ^ 0x7399e7a77eda71a7) - 0x77;
-		vector.m128i_u64[1] = ((vector.m128i_u64[1] - 0x64) ^ 0x7399e7a77eda71a7) - 0x77;
-		return *reinterpret_cast<vec3*>(&vector);
+	__m128i vector = _mm_load_si128(&address);
+    	vector.m128i_u64[0] = ((vector.m128i_u64[0] - 0x71412CC08DA87CA5) ^ 0x40) - 45;
+    	vector.m128i_u64[1] = ((vector.m128i_u64[1] - 0x71412CC08DA87CA5) ^ 0x40) - 45;
+    	return *reinterpret_cast<Vector3*>(&vector);
 	}
 	static bool WorldToScreen(vec3 world, vec2& output)
 	{
-		vec3 temp = world - DecryptCamera(driver::Read<__m128i>(globals.cam + 0x1C0)); // translation
-		float x, y, z = { };
-		x = temp.dot(DecryptCamera(driver::Read<__m128i>(globals.cam + 0x190))); //right
-		y = temp.dot(DecryptCamera(driver::Read<__m128i>(globals.cam + 0x1A0))); // up
-		z = temp.dot(DecryptCamera(driver::Read<__m128i>(globals.cam + 0x1B0)) * -1.f); // forward
+		Vector3 temp = world - DecryptCamera(driver::Read<__m128i>(globals.cam + 0x150)); // translation
+		float x = temp.Dot(DecryptCamera(driver::Read<__m128i>(globals.cam + 0x120))); //right
+		float y = temp.Dot(DecryptCamera(driver::Read<__m128i>(globals.cam + 0x130))); // up
+		float z = temp.Dot(DecryptCamera(driver::Read<__m128i>(globals.cam + 0x140)) * -1.f); // forward
 
 		int width = GetSystemMetrics(SM_CXSCREEN);
 		int height = GetSystemMetrics(SM_CYSCREEN);
 
-		output.x = (width / 2.f) * (1.f + x / -driver::Read<float>(globals.cam + 0x360) / z); // fovx
-		output.y = (height / 2.f) * (1.f - y / -driver::Read<float>(globals.cam + 0x364) / z); // fovy
+		output.x = (width / 2.f) * (1.f + x / - driver::Read<float>(globals.cam + 0x360) / z); // fovx
+		output.y = (height / 2.f) * (1.f - y / - driver::Read<float>(globals.cam + 0x364) / z); // fovy
 
 		if (output.x < 0.0f || output.x > width)
 			return false;
@@ -133,7 +128,7 @@ namespace Game
 	}
 	uint64_t ReplicationInfo(uint64_t controller)
 	{
-		return __ROL8__(__ROL8__(driver::Read<uint64_t>(controller + 0x70), 0x1C) - 0x4Ci64, 0x27);
+		return __ROL8__(__ROL8__(driver::Read<uint64_t>(controller + 0x70), 0x29) + 0xE4C68C74AA66B72i64, 0x1C);
 	}
 	std::string name(uintptr_t entity)
 	{
@@ -142,18 +137,19 @@ namespace Game
 	}
 	static uint32_t get_team_id(const uint64_t replicationinfo)
 	{
-		uint64_t rax = 0ull, rbx = 0ull, rcx = 0ull, rdx = 0ull, rdi = 0ull, rsi = 0ull, r8 = 0ull, r9 = 0ull, r10 = 0ull, r11 = 0ull, r12 = 0ull, r13 = 0ull, r14 = 0ull, r15 = 0ull, rbp = replicationinfo;
-		rax = driver::Read<uint64_t>(rbp + 0x70);
-		rax = _rotl64(rax, 0x25);
-		rax += 0x14455B1E10BCF6B1i64;
-		rax = _rotl64(rax, 0x37);
-		rax = driver::Read<uint64_t>(rax + 0x84);
-		rax -= 0x7BB86DD6;
-		rax ^= 0x63;
-		rax -= 0x43;
+		uint64_t rax = 0ull, rbx = 0ull, rcx = 0ull, rdx = 0ull, rdi = 0ull, rsi = replicationinfo, r8 = 0ull, r9 = 0ull, r10 = 0ull, r11 = 0ull, r12 = 0ull, r13 = 0ull, r14 = 0ull, r15 = 0ull, rbp = 0ull;
+		rax = driver::Read<uint64_t>(rsi + 0xA0);
+		rax = _rotl64(rax, 0x20);
+		rdx = 0xF015CD36AC3C4155;
+		rdx += rax;
+		rcx = 0xCB34845D34447E28;
+		rcx ^= rdx;
+		rax = 0x98BA1DFD;
+		rax = (uint32_t)rax ^ driver::Read<uint32_t>(rcx + 0x8C);
+		rax += 0x49472742;
 		return rax;
 	}
-	const char* OperatorNames[28][6] =
+	const char* OperatorNames[29][6] =
 	{
 		// Credits Dude on UC for opnames. 
 		{"AI","SMOKE","MUTE","SLEDGE","THATCHER"}, //0
@@ -184,6 +180,7 @@ namespace Game
 		{"","MELUSI"}, //25
 		{"ZERO"}, //26
 		{"THUNDERBIRD"}, //26
+		{"THORN"}, // 27
 	};
 	auto OpName(uintptr_t player) -> const char*
 	{
@@ -191,6 +188,24 @@ namespace Game
 		auto ctu = driver::Read<uint8_t>(replicationInfo + 0x1C0);
 		auto op = driver::Read<uint8_t>(replicationInfo + 0x1C1);
 		return OperatorNames[ctu][op];
+	}
+
+	uintptr_t Networkmanager()
+	{
+		uintptr_t networkManager = driver::Read<uint64_t>(Base + 0x65383A0);
+		return networkManager;
+	}
+
+	std::pair<uint64_t, uint32_t> GetGadgetList()
+	{
+		uintptr_t network_manager = Networkmanager();
+
+		const auto decryption = [&network_manager](const uint32_t offset = 0) -> uint64_t
+		{
+			return driver::Read<uint64_t>(network_manager + 0x40 + offset);
+		};
+
+		return { decryption(), static_cast<uint32_t>(decryption(8) & 0x3FFFFFFF) };
 	}
 };
 

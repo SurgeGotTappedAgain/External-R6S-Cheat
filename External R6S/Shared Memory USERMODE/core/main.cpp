@@ -14,7 +14,7 @@ auto UpdateEnts()
 	while (true)
 	{
 		std::vector<entity_t> tmp = { {} };
-		for (int i = 0; i < 11 i++)
+		for (int i = 0; i < globals.entityCount; i++)
 		{
 			uint64_t player = driver::Read<uint64_t>(globals.entityList + (i * sizeof(uint64_t)));
 			if (!player) continue;
